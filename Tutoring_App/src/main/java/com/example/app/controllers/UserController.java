@@ -1,10 +1,8 @@
 package com.example.app.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 
@@ -21,6 +19,9 @@ public class UserController {
     @Autowired
     private AnswerRepository answerRepository;
 
+    @Autowired
+    private AdminRepository adminRepository;
+
     @RequestMapping("")
     public String home(){
         return "Welcome Home";
@@ -30,6 +31,15 @@ public class UserController {
     public boolean userLogin(@RequestParam(name = "email") String email, @RequestParam(name = "password") String password){
         try{
             return userRepository.findById(email).get().getPassword().equals(password);
+        }
+        catch (Exception e){
+            return false;
+        }
+    }
+    @RequestMapping("/adminLogin")
+    public boolean adminLogin(@RequestParam(name = "email") String email, @RequestParam(name = "password") String password){
+        try{
+            return adminRepository.findById(email).get().getPassword().equals(password);
         }
         catch (Exception e){
             return false;
@@ -85,6 +95,35 @@ public class UserController {
             return "failed";
         }
     }
+    @RequestMapping(value = "/addRate",method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
+    public String addRate(@RequestBody Answer answer){
+        try{
+            Answer a=answerRepository.findById(answer.getId()).get();
+            int r=a.getRating();
+            int d=r>0?2:1;
+            answer.setRating((answer.getRating()+r)/d);
+            answerRepository.save(answer);
+            return "rated";
+        }
+        catch (Exception e){
+            return "failed";
+        }
+    }
+    @RequestMapping(value = "/addAdmin",method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
+    public String addAdmin(@RequestBody Admin admin){
+        try{
+            //Admin admin=new Admin();
+
+            adminRepository.save(admin);
+            return "added";
+        }
+        catch (Exception e){
+            System.out.println(e);
+            return "failed";
+        }
+    }
+
+
 
     @RequestMapping("/all")
     public ArrayList<Component> questions(){
@@ -109,6 +148,17 @@ public class UserController {
             System.out.println(e);
         }
         return new ArrayList<Component>();
+    }
+
+    @RequestMapping("/allUsers")
+    public Iterable<User> getUsers(){
+        try{
+            return userRepository.findAll();
+        }
+        catch (Exception e){
+            System.out.println(e);
+        }
+        return new ArrayList<User>();
     }
 
 }
