@@ -5,8 +5,27 @@ import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
+import Rating from "@material-ui/lab/Rating";
 import Typography from "@material-ui/core/Typography";
-import { FormHelperText, TextareaAutosize } from "@material-ui/core";
+import Box from "@material-ui/core/Box";
+import { FormHelperText, TextareaAutosize, Modal } from "@material-ui/core";
+
+function rand() {
+  return Math.round(Math.random() * 20) - 10;
+}
+
+function getModalStyle() {
+  const top = 50 + rand();
+  const left = 50 + rand();
+
+  return {
+    top: `${top}%`,
+    left: `${left}%`,
+    transform: `translate(-${top}%, -${left}%)`,
+  };
+}
+
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,6 +43,14 @@ const useStyles = makeStyles((theme) => ({
   card: {
     maxWidth: 1400,
   },
+  paper: {
+    position: 'absolute',
+    width: 400,
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+  },
 }));
 
 export default function Home() {
@@ -34,6 +61,49 @@ export default function Home() {
   const [helper, setHelper] = useState("");
   const [render, setRender] = useState(false);
   const history = useHistory();
+  const [modalStyle] = React.useState(getModalStyle);
+
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(0);
+  const [data, setData] = useState({});
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleRate = (a) => {
+    setData(a);
+    handleOpen();
+  };
+
+  const setRate = () => {
+    let obj=data;
+    obj.rating=value;
+    setData(obj);
+    fetch("http://localhost:6065/addRate", {
+      method: "POST", // or 'PUT'
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.text())
+      .then((data) => {
+        setRender(true);
+        setRender(false);
+        console.log("Success:", data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+      handleClose();
+      setRender(true);
+      setRender(false);
+  };
 
   useEffect(() => {
     fetch("http://localhost:6065/all")
@@ -93,6 +163,41 @@ export default function Home() {
     history.push("/add");
   };
 
+  const body = (
+    <div style={modalStyle} className={classes.paper}>
+      <>
+          <Typography component="legend">Rating:</Typography>
+          <Rating
+            name="simple-controlled"
+            value={value}
+            onChange={(event, newValue) => {
+              setValue(newValue);
+            }}
+          />
+        
+        <Button color="primary" onClick={() => setRate()}>
+          Rate
+        </Button>
+        </>
+    </div>
+  );
+  const deleteQuestion = (id) => {
+    fetch("http://localhost:6065/deleteQuestion?id=" + id)
+      .then((res) => res.text())
+      .then((r) => {
+        if (r === "deleted") {
+          setRender("done");
+          setRender("");
+        } else {
+          alert("Failed/Unable to post Try again");
+        }
+      })
+      .catch((e) => {
+        alert("Failed/Unable to post Try again");
+        console.log(e);
+      });
+  };
+
   return (
     <>
       <h1></h1>
@@ -136,7 +241,26 @@ export default function Home() {
                               </Typography>
                             </CardContent>
                             <CardActions>
-                              <Button color="primary">Rate</Button>
+                              <Button
+                                color="primary"
+                                onClick={() => handleRate(r)}
+                              >
+                                Rate
+                              </Button>
+                              <Box
+                                component="fieldset"
+                                mb={3}
+                                borderColor="transparent"
+                              >
+                                <Typography component="legend">
+                                  Rating:
+                                </Typography>
+                                <Rating
+                                  name="read-only"
+                                  value={r.rating}
+                                  readOnly
+                                />
+                              </Box>
                             </CardActions>
                           </Card>
                           <h1></h1>
@@ -153,7 +277,7 @@ export default function Home() {
                     )}
                   </CardContent>
                   <CardActions>
-                    <Button color="primary">Delete</Button>
+                    <Button color="primary" onClick={()=>deleteQuestion(row.question.id)}>Delete</Button>
                   </CardActions>
                 </Card>
                 <h1></h1>
@@ -199,7 +323,26 @@ export default function Home() {
                               </Typography>
                             </CardContent>
                             <CardActions>
-                              <Button color="primary">Rate</Button>
+                              <Button
+                                color="primary"
+                                onClick={() => handleRate(r)}
+                              >
+                                Rate
+                              </Button>
+                              <Box
+                                component="fieldset"
+                                mb={3}
+                                borderColor="transparent"
+                              >
+                                <Typography component="legend">
+                                  Rating:
+                                </Typography>
+                                <Rating
+                                  name="read-only"
+                                  value={r.rating}
+                                  readOnly
+                                />
+                              </Box>
                             </CardActions>
                           </Card>
                           <h1></h1>
@@ -246,6 +389,15 @@ export default function Home() {
           <h1>No Questions Available</h1>
         )}
       </div>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+      >
+        {body}
+      </Modal>
     </>
   );
+  
 }

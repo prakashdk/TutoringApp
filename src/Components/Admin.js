@@ -5,6 +5,7 @@ import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
+import { useHistory } from "react-router";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,6 +29,7 @@ export default function Home() {
   const classes = useStyles();
   const [questions, setQuestions] = useState([]);
   const [render, setRender] = useState("");
+  const history=useHistory();
 
   useEffect(() => {
     fetch("http://localhost:6065/all")
@@ -80,10 +82,19 @@ export default function Home() {
   const isEmpty = (a) => {
     return a === "" || a === null || a === undefined || a === "0" || a === 0;
   };
+  const addUser=() => {
+    history.push("/users");
+  };
 
   return (
     <>
       <div>
+      <h1></h1>
+      <div className="button">
+        <Button variant="outlined" color="primary" onClick={addUser}>
+          <b>Users</b>
+        </Button>
+      </div>
         <div className="header">
           <h1>Welcome admin</h1>
         </div>

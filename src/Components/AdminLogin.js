@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function UserLogin() {
+export default function AdminLogin() {
   const classes = useStyles();
   const history=useHistory();
   const [email,setEmail]=useState("");
@@ -40,12 +40,12 @@ export default function UserLogin() {
   const [error,setError]=useState("");
 
   const handleLogin=()=>{
-      fetch("http://localhost:6065/login?email="+email+"&password="+password)
+      fetch("http://localhost:6065/adminLogin?email="+email+"&password="+password)
       .then(request=>request.text())
       .then(req=>{
           if(req==="true"){
               sessionStorage.setItem("email",email);
-              history.push("/home");
+              history.push("/admin");
           }
           else{
               setError("Invalid Credentials");
@@ -62,7 +62,7 @@ export default function UserLogin() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in
+            Admin Sign in
           </Typography>
           <div className={classes.form} noValidate>
             <TextField

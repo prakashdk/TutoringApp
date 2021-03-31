@@ -4,6 +4,8 @@ import Home from "./Components/Home";
 import Add from "./Components/Add";
 import Login from "./Components/UserLogin";
 import Admin from "./Components/Admin";
+import AdminLogin from "./Components/AdminLogin";
+import Users from "./Components/Users";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import {
   AppBar,
@@ -61,6 +63,12 @@ function App() {
           </Route>
           <Route exact path="/admin">
             <Admin />
+          </Route>
+          <Route exact path="/users">
+            <Users />
+          </Route>
+          <Route exact path="/adminLogin">
+            <AdminLogin />
           </Route>
         </Switch>
       </div>
