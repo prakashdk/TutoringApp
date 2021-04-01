@@ -112,8 +112,9 @@ public class UserController {
     @RequestMapping(value = "/addAdmin",method = RequestMethod.POST,produces = MediaType.APPLICATION_JSON_VALUE)
     public String addAdmin(@RequestBody Admin admin){
         try{
-            //Admin admin=new Admin();
-
+            //Admin a=new Admin();
+            //a.setEmail(admin.getEmail());
+            //a.setPassword(admin.getPassword());
             adminRepository.save(admin);
             return "added";
         }
@@ -151,14 +152,47 @@ public class UserController {
     }
 
     @RequestMapping("/allUsers")
-    public Iterable<User> getUsers(){
+    public Iterable<Tag> getUsers(){
         try{
-            return userRepository.findAll();
+            ArrayList<Tag> tagList=new ArrayList<Tag>();
+            for (User u:userRepository.findAll()){
+                if(adminRepository.existsById(u.getEmail())){
+                    tagList.add(new Tag(u,"admin"));
+                }
+                else{
+                    tagList.add(new Tag(u,"user"));
+                }
+            }
+            return tagList;
         }
         catch (Exception e){
             System.out.println(e);
         }
-        return new ArrayList<User>();
+        return new ArrayList<Tag>();
     }
+
+    @RequestMapping("/chart")
+    public Chart getStats(){
+        try{
+            Chart chart=new Chart();
+            chart.setQuestions(questionRepository.count());
+            chart.setAnswers(answerRepository.count());
+            int sum=0,c=0;
+            for (Answer answer:answerRepository.findAll()){
+                sum+=answer.getRating();
+                if(answer.getRating()>0){
+                    c++;
+                }
+            }
+            chart.setRating(sum/c);
+            return chart;
+        }
+        catch (Exception e){
+            System.out.println(e);
+        }
+        return new Chart();
+    }
+
+
 
 }
