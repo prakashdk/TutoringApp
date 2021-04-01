@@ -8,7 +8,15 @@ import Button from "@material-ui/core/Button";
 import Rating from "@material-ui/lab/Rating";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import { FormHelperText, TextareaAutosize, Modal } from "@material-ui/core";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import PropTypes from 'prop-types';
+import {
+  FormHelperText,
+  TextareaAutosize,
+  Modal,
+  Paper,
+} from "@material-ui/core";
 
 function rand() {
   return Math.round(Math.random() * 20) - 10;
@@ -24,8 +32,6 @@ function getModalStyle() {
     transform: `translate(-${top}%, -${left}%)`,
   };
 }
-
-
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -44,14 +50,19 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: 1400,
   },
   paper: {
-    position: 'absolute',
+    position: "absolute",
     width: 400,
     backgroundColor: theme.palette.background.paper,
-    border: '2px solid #000',
+    border: "2px solid #000",
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
   },
 }));
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.any.isRequired,
+  value: PropTypes.any.isRequired,
+};
 
 export default function Home() {
   const classes = useStyles();
@@ -67,6 +78,12 @@ export default function Home() {
   const [value, setValue] = useState(0);
   const [data, setData] = useState({});
 
+  const [val, setVal] = React.useState("one");
+
+  const handleChange = (event, newValue) => {
+    setVal(newValue);
+  };
+
   const handleOpen = () => {
     setOpen(true);
   };
@@ -81,8 +98,8 @@ export default function Home() {
   };
 
   const setRate = () => {
-    let obj=data;
-    obj.rating=value;
+    let obj = data;
+    obj.rating = value;
     setData(obj);
     fetch("http://localhost:6065/addRate", {
       method: "POST", // or 'PUT'
@@ -100,9 +117,9 @@ export default function Home() {
       .catch((error) => {
         console.error("Error:", error);
       });
-      handleClose();
-      setRender(true);
-      setRender(false);
+    handleClose();
+    setRender(true);
+    setRender(false);
   };
 
   useEffect(() => {
@@ -166,19 +183,19 @@ export default function Home() {
   const body = (
     <div style={modalStyle} className={classes.paper}>
       <>
-          <Typography component="legend">Rating:</Typography>
-          <Rating
-            name="simple-controlled"
-            value={value}
-            onChange={(event, newValue) => {
-              setValue(newValue);
-            }}
-          />
-        
+        <Typography component="legend">Rating:</Typography>
+        <Rating
+          name="simple-controlled"
+          value={value}
+          onChange={(event, newValue) => {
+            setValue(newValue);
+          }}
+        />
+
         <Button color="primary" onClick={() => setRate()}>
           Rate
         </Button>
-        </>
+      </>
     </div>
   );
   const deleteQuestion = (id) => {
@@ -207,188 +224,205 @@ export default function Home() {
         </Button>
       </div>
       <div>
-        <div className="header">
-          <h1>Your questions</h1>
-        </div>
-        {myQuestions.length > 0 ? (
-          <ul>
-            {myQuestions.map((row) => (
-              <>
-                <Card className={classes.card}>
-                  <CardContent>
-                    <Typography gutterBottom variant="h4" component="h2">
-                      {row.question.question}
-                    </Typography>
-                    <Typography gutterBottom variant="body2" component="p">
-                      Posted by you
-                    </Typography>
-                    <Typography gutterBottom variant="h5" component="h2">
-                      Answers:
-                    </Typography>
-                    {row.answerList.length > 0 ? (
-                      row.answerList.map((r) => (
-                        <>
-                          <Card className={classes.root}>
-                            <CardContent>
-                              <Typography variant="h5" component="h2">
-                                {r.answer}
-                              </Typography>
-                              <Typography
-                                className={classes.pos}
-                                color="textSecondary"
-                              >
-                                posted by {r.answeredEmail}
-                              </Typography>
-                            </CardContent>
-                            <CardActions>
-                              <Button
-                                color="primary"
-                                onClick={() => handleRate(r)}
-                              >
-                                Rate
-                              </Button>
-                              <Box
-                                component="fieldset"
-                                mb={3}
-                                borderColor="transparent"
-                              >
-                                <Typography component="legend">
-                                  Rating:
-                                </Typography>
-                                <Rating
-                                  name="read-only"
-                                  value={r.rating}
-                                  readOnly
-                                />
-                              </Box>
-                            </CardActions>
-                          </Card>
-                          <h1></h1>
-                        </>
-                      ))
-                    ) : (
-                      <Typography
-                        variant="body2"
-                        color="textSecondary"
-                        component="p"
-                      >
-                        No answers
-                      </Typography>
-                    )}
-                  </CardContent>
-                  <CardActions>
-                    <Button color="primary" onClick={()=>deleteQuestion(row.question.id)}>Delete</Button>
-                  </CardActions>
-                </Card>
-                <h1></h1>
-              </>
-            ))}
-          </ul>
-        ) : (
-          <h1>No Questions Asked</h1>
-        )}
+        <Paper square>
+          <Tabs
+            value={val}
+            indicatorColor="primary"
+            textColor="primary"
+            onChange={handleChange}
+            aria-label="disabled tabs example"
+          >
+            <Tab value="one" label="Your Questions" />
+            <Tab value="two" label="Available Questions" />
+          </Tabs>
+        </Paper>
+        <TabPanel value={val} index="one">
+          <div>
+            {myQuestions.length > 0 ? (
+              <ul>
+                {myQuestions.map((row) => (
+                  <React.Fragment key={row.question.id}>
+                    <Card className={classes.card}>
+                      <CardContent>
+                        <Typography gutterBottom variant="h4" component="h2">
+                          {row.question.question}
+                        </Typography>
+                        <Typography gutterBottom variant="body2" component="p">
+                          Posted by you
+                        </Typography>
+                        <Typography gutterBottom variant="h5" component="h2">
+                          Answers:
+                        </Typography>
+                        {row.answerList.length > 0 ? (
+                          row.answerList.map((r) => (
+                            <React.Fragment key={r.id}>
+                              <Card className={classes.root}>
+                                <CardContent>
+                                  <Typography variant="h5" component="h2">
+                                    {r.answer}
+                                  </Typography>
+                                  <Typography
+                                    className={classes.pos}
+                                    color="textSecondary"
+                                  >
+                                    posted by {r.answeredEmail}
+                                  </Typography>
+                                </CardContent>
+                                <CardActions>
+                                  <Button
+                                    color="primary"
+                                    onClick={() => handleRate(r)}
+                                  >
+                                    Rate
+                                  </Button>
+                                  <Box
+                                    component="fieldset"
+                                    mb={3}
+                                    borderColor="transparent"
+                                  >
+                                    <Typography component="legend">
+                                      Rating:
+                                    </Typography>
+                                    <Rating
+                                      name="read-only"
+                                      value={r.rating}
+                                      readOnly
+                                    />
+                                  </Box>
+                                </CardActions>
+                              </Card>
+                              <h1></h1>
+                            </React.Fragment>
+                          ))
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            color="textSecondary"
+                            component="p"
+                          >
+                            No answers
+                          </Typography>
+                        )}
+                      </CardContent>
+                      <CardActions>
+                        <Button
+                          color="primary"
+                          onClick={() => deleteQuestion(row.question.id)}
+                        >
+                          Delete
+                        </Button>
+                      </CardActions>
+                    </Card>
+                    <h1></h1>
+                  </React.Fragment>
+                ))}
+              </ul>
+            ) : (
+              <h1>No Questions Asked</h1>
+            )}
+          </div>
+        </TabPanel>
+        <TabPanel value={val} index="two">
+          <div>
+            {questions.length > 0 ? (
+              <ul>
+                {questions.map((row, index) => (
+                  <React.Fragment key={row.question.id}>
+                    <Card className={classes.card}>
+                      <CardContent>
+                        <Typography gutterBottom variant="h4" component="h2">
+                          {row.question.question}
+                        </Typography>
+                        <Typography gutterBottom variant="body2" component="p">
+                          Posted by {row.question.postEmail}
+                        </Typography>
+                        <Typography gutterBottom variant="h5" component="h2">
+                          Answers:
+                        </Typography>
+                        {row.answerList.length > 0 ? (
+                          row.answerList.map((r) => (
+                            <React.Fragment key={r.id}>
+                              <Card className={classes.root}>
+                                <CardContent>
+                                  <Typography variant="h5" component="h2">
+                                    {r.answer}
+                                  </Typography>
+                                  <Typography
+                                    className={classes.pos}
+                                    color="textSecondary"
+                                  >
+                                    posted by {r.answeredEmail}
+                                  </Typography>
+                                </CardContent>
+                                <CardActions>
+                                  <Button
+                                    color="primary"
+                                    onClick={() => handleRate(r)}
+                                  >
+                                    Rate
+                                  </Button>
+                                  <Box
+                                    component="fieldset"
+                                    mb={3}
+                                    borderColor="transparent"
+                                  >
+                                    <Typography component="legend">
+                                      Rating:
+                                    </Typography>
+                                    <Rating
+                                      name="read-only"
+                                      value={r.rating}
+                                      readOnly
+                                    />
+                                  </Box>
+                                </CardActions>
+                              </Card>
+                              <h1></h1>
+                            </React.Fragment>
+                          ))
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            color="textSecondary"
+                            component="p"
+                          >
+                            No answers
+                          </Typography>
+                        )}
+                      </CardContent>
+                      <TextareaAutosize
+                        aria-label="minimum height"
+                        rowsMin={3}
+                        style={{ width: "300px" }}
+                        placeholder="Enter Answer"
+                        onFocus={() => {
+                          setHelper("");
+                        }}
+                        onChange={(event) => {
+                          setAnswer(event.target.value);
+                        }}
+                      />
+                      <FormHelperText error>{helper}</FormHelperText>
+                      <CardActions>
+                        <Button
+                          color="primary"
+                          onClick={() => handleAnswer(row.question.id)}
+                        >
+                          Add answer
+                        </Button>
+                      </CardActions>
+                    </Card>
+                    <h1></h1>
+                  </React.Fragment>
+                ))}
+              </ul>
+            ) : (
+              <h1>No Questions Available</h1>
+            )}
+          </div>
+        </TabPanel>
       </div>
-      <div className="header">
-        <h1>Available questions</h1>
-      </div>
-      <div>
-        {questions.length > 0 ? (
-          <ul>
-            {questions.map((row) => (
-              <>
-                <Card className={classes.card}>
-                  <CardContent>
-                    <Typography gutterBottom variant="h4" component="h2">
-                      {row.question.question}
-                    </Typography>
-                    <Typography gutterBottom variant="body2" component="p">
-                      Posted by {row.question.postEmail}
-                    </Typography>
-                    <Typography gutterBottom variant="h5" component="h2">
-                      Answers:
-                    </Typography>
-                    {row.answerList.length > 0 ? (
-                      row.answerList.map((r) => (
-                        <>
-                          <Card className={classes.root}>
-                            <CardContent>
-                              <Typography variant="h5" component="h2">
-                                {r.answer}
-                              </Typography>
-                              <Typography
-                                className={classes.pos}
-                                color="textSecondary"
-                              >
-                                posted by {r.answeredEmail}
-                              </Typography>
-                            </CardContent>
-                            <CardActions>
-                              <Button
-                                color="primary"
-                                onClick={() => handleRate(r)}
-                              >
-                                Rate
-                              </Button>
-                              <Box
-                                component="fieldset"
-                                mb={3}
-                                borderColor="transparent"
-                              >
-                                <Typography component="legend">
-                                  Rating:
-                                </Typography>
-                                <Rating
-                                  name="read-only"
-                                  value={r.rating}
-                                  readOnly
-                                />
-                              </Box>
-                            </CardActions>
-                          </Card>
-                          <h1></h1>
-                        </>
-                      ))
-                    ) : (
-                      <Typography
-                        variant="body2"
-                        color="textSecondary"
-                        component="p"
-                      >
-                        No answers
-                      </Typography>
-                    )}
-                  </CardContent>
-                  <TextareaAutosize
-                    aria-label="minimum height"
-                    rowsMin={3}
-                    style={{ width: "300px" }}
-                    placeholder="Enter Answer"
-                    onFocus={() => {
-                      setHelper("");
-                    }}
-                    value={answer}
-                    onChange={(event) => {
-                      setAnswer(event.target.value);
-                    }}
-                  />
-                  <FormHelperText error>{helper}</FormHelperText>
-                  <CardActions>
-                    <Button
-                      color="primary"
-                      onClick={() => handleAnswer(row.question.id)}
-                    >
-                      Add answer
-                    </Button>
-                  </CardActions>
-                </Card>
-                <h1></h1>
-              </>
-            ))}
-          </ul>
-        ) : (
-          <h1>No Questions Available</h1>
-        )}
-      </div>
+
       <Modal
         open={open}
         onClose={handleClose}
@@ -399,5 +433,23 @@ export default function Home() {
       </Modal>
     </>
   );
-  
+}
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`wrapped-tabpanel-${index}`}
+      aria-labelledby={`wrapped-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box p={3}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
 }

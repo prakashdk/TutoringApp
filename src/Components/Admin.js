@@ -6,6 +6,7 @@ import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { useHistory } from "react-router";
+import {Link} from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -90,19 +91,14 @@ export default function Home() {
     <>
       <div>
       <h1></h1>
-      <div className="button">
-        <Button variant="outlined" color="primary" onClick={addUser}>
-          <b>Users</b>
-        </Button>
-      </div>
         <div className="header">
           <h1>Welcome admin</h1>
         </div>
         {questions.length > 0 ? (
           <ul>
             {questions.map((row) => (
-              <>
-                <Card className={classes.card}>
+              <React.Fragment key={row.question.id}>
+                <Card className={classes.card} >
                   <CardContent>
                     <Typography gutterBottom variant="h4" component="h2">
                       {row.question.question}
@@ -115,7 +111,7 @@ export default function Home() {
                     </Typography>
                     {row.answerList.length > 0 ? (
                       row.answerList.map((r) => (
-                        <>
+                        <React.Fragment key={r.answer.id}>
                           <Card className={classes.root}>
                             <CardContent>
                               <Typography variant="h5" component="h2">
@@ -136,7 +132,7 @@ export default function Home() {
                             </Button>
                           </Card>
                           <h1></h1>
-                        </>
+                        </React.Fragment>
                       ))
                     ) : (
                       <Typography
@@ -158,7 +154,7 @@ export default function Home() {
                   </CardActions>
                 </Card>
                 <h1></h1>
-              </>
+              </React.Fragment>
             ))}
           </ul>
         ) : (

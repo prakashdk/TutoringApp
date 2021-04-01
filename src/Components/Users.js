@@ -6,6 +6,7 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import Chip from '@material-ui/core/Chip';
 
 const useStyles = makeStyles({
   root: {
@@ -27,6 +28,7 @@ export default function Users() {
     const [users,setUsers]=useState([]);
     const history = useHistory();
     const classes = useStyles();
+    const [render,setRender]=useState(false);
 
   useEffect(() => {
     fetch("http://localhost:6065/allUsers")
@@ -38,7 +40,7 @@ export default function Users() {
       .catch((e) => {
         console.log(e);
       });
-  }, []);
+  }, [render]);
   const setAdmin = (data) => {
     fetch("http://localhost:6065/addAdmin", {
       method: "POST", // or 'PUT'
@@ -51,6 +53,8 @@ export default function Users() {
       .then((d) => {
         if(d==="added"){
             alert(data.email+" is an admin");
+            setRender(false);
+            setRender(true);
         }
         else{
             alert("Failed try again");
@@ -84,13 +88,16 @@ export default function Users() {
                 <CardContent>
                   
                   <Typography variant="h5" component="h2">
-                      {a.email}
+                      {a.user.email}
                   </Typography>
                   
                 </CardContent>
+                {a.tag==="admin"?(<>
+                  <Chip label="admin" color="primary" />
+                </>):(
                 <CardActions>
-                  <Button size="small" onClick={()=>setAdmin(a)}>Make as Admin</Button>
-                </CardActions>
+                  <Button size="small" onClick={()=>setAdmin(a.user)}>Make as Admin</Button>
+                </CardActions>)}
               </Card>
               <h1></h1>
               </>
